@@ -54,7 +54,19 @@
     }
 
     function findAddSourcesControl(root) {
-      return findFirst(root, ADD_SOURCES_SELECTORS);
+      const structural = findFirst(root, ADD_SOURCES_SELECTORS);
+      if (structural) return structural;
+      for (const element of query(root, "button.mat-tonal-button")) {
+        if (hasAddIcon(element)) return element;
+      }
+      return null;
+    }
+
+    function hasAddIcon(element) {
+      return query(element, "mat-icon").some((icon) => {
+        const text = normalizeText(icon.textContent);
+        return text === "add" || text === "add_2";
+      });
     }
 
     function hasUploadIcon(element) {
