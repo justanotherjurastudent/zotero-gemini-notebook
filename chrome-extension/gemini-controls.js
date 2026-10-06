@@ -11,6 +11,7 @@
     "button.add-source-button",
     '[role="button"].add-source-button',
   ];
+  const SOURCE_PANEL_SELECTORS = [".source-panel-content", "source-picker"];
   const UPLOAD_TRIGGER_SELECTOR = "[xapscottyuploadertrigger]";
   const UPLOAD_ICON_BUTTON_SELECTOR = "button.drop-zone-icon-button";
 
@@ -56,8 +57,13 @@
     function findAddSourcesControl(root) {
       const structural = findFirst(root, ADD_SOURCES_SELECTORS);
       if (structural) return structural;
-      for (const element of query(root, "button.mat-tonal-button")) {
-        if (hasAddIcon(element)) return element;
+      for (const panelSelector of SOURCE_PANEL_SELECTORS) {
+        for (const panel of query(root, panelSelector)) {
+          const matched = query(panel, "button.mat-tonal-button").find(
+            (element) => eligible(element) && hasAddIcon(element),
+          );
+          if (matched) return matched;
+        }
       }
       return null;
     }

@@ -679,11 +679,7 @@ async function ensureAddSourcesDialog({ fileCount, isFinished }) {
   const addBtn =
     geminiControls.findAddSourcesControl(document) ||
     document.querySelector('[aria-label*="Add source" i]') ||
-    document.querySelector('[aria-label*="Quelle" i]') ||
-    findClickableByText("add sources") ||
-    findClickableByText("quellen hinzufügen") ||
-    findClickableByText("quelle hinzufügen") ||
-    findClickableByText("add a source");
+    findClickableByText("add sources");
 
   if (addBtn) {
     clickElement(addBtn);
@@ -851,17 +847,29 @@ function highlightAssistedUploadControl(uploadControl, onTrustedClick) {
   // This Gemini build triggers the upload on hover (mouseenter) rather than on
   // click. Dispatch synthetic mouse events so no manual hover is needed; the
   // MAIN-world injector intercepts the resulting hidden file input.
-  const controlRect = uploadControl.getBoundingClientRect();
+  const controlRect =
+    typeof uploadControl.getBoundingClientRect === "function"
+      ? uploadControl.getBoundingClientRect()
+      : { left: 0, top: 0, width: 0, height: 0 };
   const mouseOpts = {
     bubbles: true,
     cancelable: true,
     composed: true,
-    view: window,
+    ...(typeof window !== "undefined" ? { view: window } : {}),
     clientX: controlRect.left + controlRect.width / 2,
     clientY: controlRect.top + controlRect.height / 2,
   };
-  for (const type of ["pointerenter", "pointerover", "mouseover", "mouseenter", "pointermove", "mousemove"]) {
-    uploadControl.dispatchEvent(new MouseEvent(type, mouseOpts));
+  if (typeof MouseEvent === "function") {
+    for (const type of [
+      "pointerenter",
+      "pointerover",
+      "mouseover",
+      "mouseenter",
+      "pointermove",
+      "mousemove",
+    ]) {
+      uploadControl.dispatchEvent(new MouseEvent(type, mouseOpts));
+    }
   }
 
   let trustedClickHandled = false;
